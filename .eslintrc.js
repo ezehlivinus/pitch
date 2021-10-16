@@ -15,7 +15,6 @@ module.exports = {
     semi: ['error', 'always'],
     'no-underscore-dangle': [
       'error', { allowAfterThis: true, allow: ['_id'] }
-
     ]
   }
 };
