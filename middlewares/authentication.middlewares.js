@@ -19,9 +19,11 @@ class Authenticate {
     return next();
   }
 
-  // async isPermittedTo(role, action, resource) {
-  //   if (role === 'admin')
-  // }
+  async isPermittedTo(role, action, resource) {
+    if (role === 'admin') {
+      
+    }
+  }
 }
 
 export default new Authenticate();
