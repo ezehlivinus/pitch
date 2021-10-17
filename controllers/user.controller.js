@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable import/extensions */
 /* eslint-disable class-methods-use-this */
+import _ from 'lodash';
 import User from '../models/user.model.js';
 import UserService from '../services/user.service.js';
 import validateUser from '../validators/user.validator.js';
@@ -18,7 +19,7 @@ class UserController {
 
     const token = newUser.generateAuthToken();
 
-    res.header('token', token).send({
+    res.header('token', token).status(201).send({
       success: true,
       message: 'user created',
       data: { ...newUser.toJSON(), token }
@@ -26,19 +27,62 @@ class UserController {
   }
 
   async list(req, res) {
-    res.send('list all users');
+    const users = await User.find({ role: { $ne: 'admin' } });
+    if (_.isEmpty(users)) {
+      return res.status(404).send({
+        success: false,
+        message: 'users not found'
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'users list',
+      data: users
+    });
   }
 
   async detail(req, res) {
-    res.send('show a user details');
+    const result = await UserService.findIfExists(req.params.id);
+
+    if (!result.isTrue) {
+      return res.status(404).send({
+        success: false,
+        message: 'user not found'
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'user details fetched',
+      data: result.user
+    });
   }
 
   async update(req, res) {
-    res.send('update a user');
+    const user = await User.findByIdAndUpdate(req.params.id, req.body,
+      { new: true, runValidators: true });
+    res.status(200).send({
+      success: true,
+      message: 'user updated',
+      data: user
+    });
   }
 
   async delete(req, res) {
-    res.send('delete a user');
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'this user might have been deleted or the user does not exist'
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'user deleted',
+      data: user
+    });
   }
 }
 

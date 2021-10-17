@@ -48,7 +48,7 @@ class UserService {
    * @param {*} emailOrId user's email or id --- not really both
    * @returns {*} an object containing {true, userObject} or {false, null}
    */
-  async thisUserExists(emailOrId) {
+  async findIfExists(emailOrId) {
     const user = await this.findByIdOrEmail(emailOrId);
     return { isTrue: !(_.isEmpty(user)), user };
   }
