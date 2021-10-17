@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 import express from 'express';
 
-import UserController from '../controllers/user.controller.mjs';
+import UserController from '../controllers/user.controller.js';
 
 const router = express.Router();
 

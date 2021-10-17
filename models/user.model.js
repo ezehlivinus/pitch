@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 // Define user schema
 const userSchema = new mongoose.Schema({
@@ -54,12 +55,27 @@ userSchema.methods.generateAuthToken = function t() {
   return token;
 };
 
+userSchema.methods.toJSON = function toJSON() {
+  const userObject = this.toObject();
+
+  delete userObject.password;
+
+  return userObject;
+};
+
 userSchema.set('toJSON', {
   versionKey: false,
   transform(doc, ret) {
     // eslint-disable-next-line no-param-reassign
     delete ret.password;
   }
+});
+
+userSchema.pre('save', async function preSave(next) {
+  if (this.isModified('password') || this.isNew) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
 });
 
 // Define User model based on user schema
