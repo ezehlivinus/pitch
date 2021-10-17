@@ -17,4 +17,6 @@ router.route('/:id').all()
   .put([Auth.authenticate], UserController.update)
   .delete([Auth.authenticate], UserController.delete);
 
+router.post('/login', UserController.login);
+
 export default router;

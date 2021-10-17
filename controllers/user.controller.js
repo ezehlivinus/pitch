@@ -2,6 +2,7 @@
 /* eslint-disable import/extensions */
 /* eslint-disable class-methods-use-this */
 import _ from 'lodash';
+import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
 import UserService from '../services/user.service.js';
 import validateUser from '../validators/user.validator.js';
@@ -82,6 +83,22 @@ class UserController {
       success: true,
       message: 'user deleted',
       data: user
+    });
+  }
+
+  async login(req, res) {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).send({ success: false, message: 'Invalid email  or password' });
+
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    if (!validPassword) return res.status(400).send({ success: false, message: 'Invalid password or email' });
+
+    const token = user.generateAuthToken();
+
+    res.header('token', token).status(200).send({
+      success: true,
+      message: 'login success',
+      data: { ...user.toJSON(), token }
     });
   }
 }
