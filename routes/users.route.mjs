@@ -1,7 +1,8 @@
 /* eslint-disable import/extensions */
 import express from 'express';
 
-import UserController from '../controllers/user.controller.mjs';
+import UserController from '../controllers/user.controller.js';
+import Auth from '../middlewares/authentication.middlewares.js';
 
 const router = express.Router();
 
@@ -13,7 +14,9 @@ router.route('/')
 
 router.route('/:id').all()
   .get(UserController.detail)
-  .put(UserController.update)
-  .delete(UserController.delete);
+  .put([Auth.authenticate], UserController.update)
+  .delete([Auth.authenticate], UserController.delete);
+
+router.post('/login', UserController.login);
 
 export default router;

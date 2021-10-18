@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import log from './logger.mjs';
 
 function connect() {
-  return mongoose
+  mongoose
     .connect(process.env.DB_URL)
     .then(() => {
       log.info('database connected');
@@ -13,7 +13,10 @@ function connect() {
     .catch((error) => {
       console.log(error);
       log.error('database error', error);
-      process.exit(1);
+
+      log.info('Trying to reconnect database...');
+      connect();
+      // process.exit(1);
     });
 }
 

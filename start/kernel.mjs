@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import database from '../config/database.mjs';
-import asyncErrors from '../middlewares/async.errors.middleware.mjs';
+import asyncErrors from '../middlewares/async.errors.middleware.js';
 
 import routes from './routes.mjs';
 
