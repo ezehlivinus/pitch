@@ -6,8 +6,6 @@ import Auth from '../middlewares/authentication.middlewares.js';
 
 const router = express.Router();
 
-router.use('/users', router);
-
 router.route('/')
   .get(UserController.list)
   .post(UserController.create);

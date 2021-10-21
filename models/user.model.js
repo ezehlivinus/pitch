@@ -40,7 +40,12 @@ const userSchema = new mongoose.Schema({
     enum: ['manager', 'player'],
     default: 'player',
     required: true
-  }
+  },
+
+  teamId: {
+    type: String,
+    required: true
+  },
 
 }, { timestamps: true });
 

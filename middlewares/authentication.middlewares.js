@@ -19,9 +19,12 @@ class Authenticate {
     return next();
   }
 
-  // async isPermittedTo(role, action, resource) {
-  //   if (role === 'admin')
-  // }
+ 
+
+// I will do within code in controller but in the 
+  async isPermittedTo(action, resource) {
+
+  }
 }
 
 export default new Authenticate();
