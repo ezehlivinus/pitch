@@ -46,35 +46,23 @@ class TeamService {
     }
   }
 
-  isManager() {
-    return req.auth.role === 'manager';
+  async isTeamManager(team, user) {
+    return this.isManager(user.role) && this.isTeamMember(user, team)
   }
 
-  isPlayer() {
-    return req.auth.role === 'player';
+  isManager(role) {
+    return role === 'manager';
   }
 
-  async isPermitted(role) {
-    
-    const toPermit = {
-      player: this.isPlayer(),
-      manager: this.isManager()
-    }
-
-    
-    if (!toPermit[role]) {
-      throw Error('Unauthorised access')
-    }
-
-    return true;
+  isPlayer(role) {
+    return role === 'player';
   }
 
-  isBelongTo(team, user) {
-    if (team._id !== user.teamId) {
-      throw Error('Unauthorised access')
-    }
 
-    return true;
+
+  // check if the user belong to the team
+  isTeamMember(user, team) {
+    return team._id.toString() === user.teamId.toString()
   }
 
 }

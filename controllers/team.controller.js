@@ -23,6 +23,7 @@ class TeamController {
 
     const teamManager = await UserService.findById(req.auth._id);
     teamManager.role = 'manager';
+    teamManager.teamId = newTeam._id;
     teamManager.save();
 
     res.status(201).send({
@@ -103,8 +104,14 @@ class TeamController {
 
   async addNewPlayer (req, res) {
     
-    TeamService.isPermitted('manager')
+    const isManager = await TeamService.isTeamManager({ _id: req.params.teamId }, req.auth)
 
+    if (!isManager) {
+      return res.status(400).send({
+        success: false,
+        message: 'Unauthorised access'
+      })
+    }
 
     const team = await TeamService.findById(req.params.teamId);
 
@@ -115,10 +122,9 @@ class TeamController {
       });
     }
 
-    TeamService.isBelongTo(team, req.auth)
 
     const player = await User.findOne({ 
-      id: req.params.playerId, role: 'player'
+      _id: req.body.playerId, role: 'player'
     });
 
     if (_.isEmpty(player)) {
@@ -128,8 +134,20 @@ class TeamController {
       });
     }
 
+    const isTeamMember = TeamService.isTeamMember(player, team);
+    
+    if (isTeamMember) {
+      return res.status(404).send({
+        success: false,
+        message: 'No changes was done. This player is already a member'
+      });
+    }
+
     player.teamId = team._id;
     await player.save()
+
+    team.numberOfPlayers += 1
+    await team.save()
 
     return res.status(201).send({
       success: true,
@@ -140,7 +158,14 @@ class TeamController {
   }
 
   async removePlayer (req, res) {
-    TeamService.isPermitted('manager')
+    const isManager = await TeamService.isTeamManager({ _id: req.params.teamId }, req.auth)
+
+    if (!isManager) {
+      return res.status(400).send({
+        success: false,
+        message: 'Unauthorised access'
+      })
+    }
     
     const team = await TeamService.findById(req.params.teamId);
 
@@ -151,21 +176,30 @@ class TeamController {
       });
     }
 
-    TeamService.isBelongTo(team, req.auth)
-
     const player = await User.findOne({ 
-      id: req.params.playerId, teamId: team._id, role: 'player'
+      _id: req.params.id, teamId: team._id, role: 'player'
     });
 
     if (_.isEmpty(player)) {
       return res.status(404).send({
         success: false,
-        message: 'player not found'
+        message: 'player not found on this team or does not exist'
       });
     }
 
-    player.teamId = team._id;
+    const isTeamMember = TeamService.isTeamMember(player, team);
+    if (!isTeamMember) {
+      return res.status(404).send({
+        success: false,
+        message: 'This player does not belong to this team'
+      });
+    }
+
+    player.teamId = null;
     await player.save()
+
+    team.numberOfPlayers -= 1
+    await team.save()
 
     return res.status(201).send({
       success: true,
@@ -175,8 +209,16 @@ class TeamController {
 
   }
 
+  // allow player to leave a team
   async leaveTeam(req, res) {
-    TeamService.isPermitted('player')
+    const isMember = TeamService.isTeamMember(req.auth, req.params.teamId)
+
+    if (!isMember) {
+      return res.status(400).send({
+        success: false,
+        message: 'User is not a team member'
+      });
+    }
 
     const team = await TeamService.findById(req.params.teamId);
 
@@ -187,10 +229,8 @@ class TeamController {
       });
     }
 
-    TeamService.isBelongTo(team, req.auth)
-
     const player = await User.findOne({ 
-      id: req.params.playerId, teamId: team._id, role: 'player'
+      _id: req.params.id, teamId: team._id, role: 'player'
     });
 
     if (_.isEmpty(player)) {
@@ -203,12 +243,28 @@ class TeamController {
     player.teamId = null;
     await player.save()
 
+    team.numberOfPlayers -= 1
+    await team.save()
+
     return res.status(201).send({
       success: true,
       message: 'success',
       data: player
     });
 
+  }
+
+  // allow manager to join an existing team
+  async joinTeam(req, res) {
+    const team = await TeamService.findById(req.params.id);
+    if(_.isEmpty(team)) {
+      return res.status(404).send({
+        success: false,
+        message: 'Team not found'
+      })
+    }
+
+    // to be continue
   }
 
 }

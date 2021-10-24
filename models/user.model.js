@@ -43,8 +43,7 @@ const userSchema = new mongoose.Schema({
   },
 
   teamId: {
-    type: String,
-    required: true
+    type: String
   },
 
 }, { timestamps: true });

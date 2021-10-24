@@ -15,5 +15,12 @@ router.route('/:id').all()
   .put([Auth.authenticate], TeamController.update)
   .delete([Auth.authenticate], TeamController.delete);
 
+router.route('/:teamId/players')
+  .post(Auth.authenticate, TeamController.addNewPlayer)
+  
+router.route('/:teamId/players/:id')
+  .put(Auth.authenticate, TeamController.removePlayer)
+  // .put(Auth.authenticate, TeamController.leaveTeam)
+
 
 export default router;
